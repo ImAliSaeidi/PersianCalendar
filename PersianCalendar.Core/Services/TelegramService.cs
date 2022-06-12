@@ -62,7 +62,7 @@
             return Task.CompletedTask;
         }
 
-        public async Task SendDailyOccasions(long chatId, OccasionsResult occasionsResult)
+        private async Task SendDailyOccasions(long chatId, OccasionsResult occasionsResult)
         {
             var occasionsList = occasionsResult.Values.Select(x => x.Occasion).ToList();
             var occasionsString = "مناسبتی وجود ندارد";
@@ -83,7 +83,7 @@
             await botClient.SendTextMessageAsync(chatId, message);
         }
 
-        public async Task ResponseToCommand(long chatId, string command)
+        private async Task ResponseToCommand(long chatId, string command)
         {
             LastCommand = command;
             ChatId = chatId;
@@ -124,6 +124,11 @@
         {
             var message = "لطفا نام شهر مورد نظر خود را با فرمت زیر ارسال کنید:\n/تهران";
             await botClient.SendTextMessageAsync(chatId, message);
+        }
+
+        public async Task SendStartMessage()
+        {
+            await botClient.SendTextMessageAsync("395886871", "Start");
         }
     }
 }

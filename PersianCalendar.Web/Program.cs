@@ -16,7 +16,9 @@ builder.Configuration.GetSection("CalendarAPIConfiguration").Bind(new CalendarAP
 builder.Configuration.GetSection("TelegramBotConfig").Bind(new TelegramBotConfig());
 builder.Configuration.GetSection("PrayerTimeApiConfig").Bind(new PrayerTimeApiConfig());
 
-builder.Services.BuildServiceProvider().GetRequiredService<ITelegramService>().Start();
+var telegramService = builder.Services.BuildServiceProvider().GetRequiredService<ITelegramService>();
+telegramService.Start();
+telegramService.SendStartMessage();
 
 var app = builder.Build();
 
