@@ -1,7 +1,7 @@
 ﻿namespace PersianCalendar.Web.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class PersianCalendarsController : ControllerBase
     {
         private readonly IPersianCalendarService persianCalendarService;
