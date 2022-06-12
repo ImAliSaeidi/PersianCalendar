@@ -1,7 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
-using PersianCalendar.Core.IServices;
-
-namespace PersianCalendar.Web.Controllers
+﻿namespace PersianCalendar.Web.Controllers
 {
     [ApiController]
     [Route("[controller]")]
@@ -17,7 +14,7 @@ namespace PersianCalendar.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> GetDate()
         {
-            return Ok(await persianCalendarService.GetPersianDate());
+            return Ok(await persianCalendarService.GetPrayerTimeForCityOfIran("تهران"));
         }
     }
 }

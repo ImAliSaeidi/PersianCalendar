@@ -1,0 +1,16 @@
+﻿global using Newtonsoft.Json;
+global using PersianCalendar.Core.Convertors;
+global using PersianCalendar.Core.IServices;
+global using PersianCalendar.Core.IServices.WebApiClient;
+global using PersianCalendar.Data.Entities.Configs;
+global using PersianCalendar.Data.Entities.Enums;
+global using PersianCalendar.Data.Entities.Reponses;
+global using PersianCalendar.Data.Entities.Requests;
+global using RestSharp;
+global using System.ComponentModel;
+global using System.Net;
+global using Telegram.Bot;
+global using Telegram.Bot.Exceptions;
+global using Telegram.Bot.Extensions.Polling;
+global using Telegram.Bot.Types;
+global using Telegram.Bot.Types.Enums;

@@ -1,22 +1,16 @@
-﻿using PersianCalendar.Core.Convertors;
-using PersianCalendar.Core.IServices;
-using PersianCalendar.Data.Entities.Reponses;
-using Telegram.Bot;
-using Telegram.Bot.Exceptions;
-using Telegram.Bot.Extensions.Polling;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-
-namespace PersianCalendar.Core.Services
+﻿namespace PersianCalendar.Core.Services
 {
     public class TelegramService : ITelegramService
     {
         private readonly TelegramBotClient botClient;
-        private const string ChatId = "395886871";
+        private readonly IPersianCalendarService persianCalendarService;
+        private string LastCommand;
+        private long ChatId;
 
-        public TelegramService()
+        public TelegramService(IPersianCalendarService persianCalendarService)
         {
-            botClient = new TelegramBotClient("5414851703:AAHtzWoRTEv9ak_kFFeyPfpRYe0xm3dSdqU");
+            botClient = new TelegramBotClient(TelegramBotConfig.Token);
+            this.persianCalendarService = persianCalendarService;
         }
 
         public void Start()
@@ -43,14 +37,16 @@ namespace PersianCalendar.Core.Services
                 return;
 
             var chatId = update.Message.Chat.Id;
-            var messageText = update.Message.Text;
-
-            Console.WriteLine($"Received a '{messageText}' message in chat {chatId}.");
-
-            Message sentMessage = await botClient.SendTextMessageAsync(
-                chatId: chatId,
-                text: "You said:\n" + messageText,
-                cancellationToken: cancellationToken);
+            var command = update.Message.Text;
+            if (command.Contains('@'))
+            {
+                command = command.Split('@')[0];
+            }
+            if (chatId == ChatId && LastCommand == "/prayertimes")
+            {
+                await SendPrayerTimeMessage(chatId, command.Replace("/", ""));
+            }
+            await ResponseToCommand(chatId, command);
         }
 
         private Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
@@ -66,20 +62,68 @@ namespace PersianCalendar.Core.Services
             return Task.CompletedTask;
         }
 
-        public async Task SendDailyOccasions(OccasionsResult occasionsResult)
+        public async Task SendDailyOccasions(long chatId, OccasionsResult occasionsResult)
         {
             var occasionsList = occasionsResult.Values.Select(x => x.Occasion).ToList();
-            var occasionsString = "";
-            for (int i = 0; i < occasionsList.Count; i++)
+            var occasionsString = "مناسبتی وجود ندارد";
+            if (occasionsList.Count != 0)
             {
-                occasionsString += $"{i + 1}){occasionsList[i]}\n";
+                occasionsString = "";
+                for (int i = 0; i < occasionsList.Count; i++)
+                {
+                    occasionsString += $"{i + 1}){occasionsList[i]}\n";
+                }
             }
+
             var message = $"تاریخ میلادی:\n{DateTime.Now.ToShortDateString()}\n" +
                 $"{new string('-', 15)}\n" +
                 $"تاریخ شمسی:\n{DateTime.Now.ToShamsiDateOnly()}\n" +
                 $"{new string('-', 15)}\n" +
                 $"مناسبت های روز:\n{occasionsString}";
-            await botClient.SendTextMessageAsync(ChatId, message);
+            await botClient.SendTextMessageAsync(chatId, message);
+        }
+
+        public async Task ResponseToCommand(long chatId, string command)
+        {
+            LastCommand = command;
+            ChatId = chatId;
+            switch (command)
+            {
+                case "/occasions":
+                    await SendDailyOccasions(chatId, await persianCalendarService.GetShamsiOccasionsOfDay());
+                    break;
+                case "/time":
+                    await SendMessage(chatId, persianCalendarService.GetPersianTime());
+                    break;
+                case "/date":
+                    await SendMessage(chatId, persianCalendarService.GetPersianDate());
+                    break;
+                case "/datetime":
+                    await SendMessage(chatId, persianCalendarService.GetPersianDateTime());
+                    break;
+                case "/prayertimes":
+                    await SendChooseCityMessage(chatId);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private async Task SendMessage(long chatId, string message)
+        {
+            await botClient.SendTextMessageAsync(chatId, message);
+        }
+
+        private async Task SendPrayerTimeMessage(long chatId, string cityName)
+        {
+            var prayerTimeResult = await persianCalendarService.GetPrayerTimeForCityOfIran(cityName);
+            await botClient.SendTextMessageAsync(chatId, prayerTimeResult.Result.ToString());
+        }
+
+        private async Task SendChooseCityMessage(long chatId)
+        {
+            var message = "لطفا نام شهر مورد نظر خود را با فرمت زیر ارسال کنید:\n/تهران";
+            await botClient.SendTextMessageAsync(chatId, message);
         }
     }
 }

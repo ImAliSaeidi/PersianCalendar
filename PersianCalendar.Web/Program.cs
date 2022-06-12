@@ -1,6 +1,3 @@
-using PersianCalendar.Core.IServices;
-using PersianCalendar.Core.Services;
-using PersianCalendar.Data.Entities.Configs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,10 +8,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<IWebApiClient, WebApiClient>();
+builder.Services.AddScoped<IPersianCalendarWebApiClient, PersianCalendarWebApiClient>();
+builder.Services.AddScoped<IPrayerTimeWebApiClient, PrayerTimeWebApiClient>();
 builder.Services.AddScoped<IPersianCalendarService, PersianCalendarService>();
 builder.Services.AddScoped<ITelegramService, TelegramService>();
 builder.Configuration.GetSection("CalendarAPIConfiguration").Bind(new CalendarAPIConfiguration());
+builder.Configuration.GetSection("TelegramBotConfig").Bind(new TelegramBotConfig());
+builder.Configuration.GetSection("PrayerTimeApiConfig").Bind(new PrayerTimeApiConfig());
 
 builder.Services.BuildServiceProvider().GetRequiredService<ITelegramService>().Start();
 

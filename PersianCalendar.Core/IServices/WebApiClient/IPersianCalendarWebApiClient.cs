@@ -1,9 +1,6 @@
-﻿using PersianCalendar.Data.Entities.Requests;
-using RestSharp;
-
-namespace PersianCalendar.Core.IServices
+﻿namespace PersianCalendar.Core.IServices.WebApiClient
 {
-    public interface IWebApiClient
+    public interface IPersianCalendarWebApiClient
     {
         Task<RestResponse<T>> Get<T>(RequestSpecification requestSpecification);
         Task<RestResponse<T>> Post<T>(RequestSpecification requestSpecification);
