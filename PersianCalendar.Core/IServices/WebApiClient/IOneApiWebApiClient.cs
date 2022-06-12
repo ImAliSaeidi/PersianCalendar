@@ -1,6 +1,6 @@
 ﻿namespace PersianCalendar.Core.IServices.WebApiClient
 {
-    public interface ICalendarWebApiClient
+    public interface IOneApiWebApiClient
     {
         Task<RestResponse<T>> Get<T>(RequestSpecification requestSpecification);
     }

@@ -9,13 +9,14 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<ICalendarWebApiClient, CalendarWebApiClient>();
-builder.Services.AddScoped<IPrayerTimeWebApiClient, PrayerTimeWebApiClient>();
+builder.Services.AddScoped<IOneApiWebApiClient, OneApiWebApiClient>();
 builder.Services.AddScoped<ICalendarService, CalendarService>();
+builder.Services.AddScoped<IOneApiService, OneApiService>();
 builder.Services.AddScoped<ITelegramService, TelegramService>();
 
 builder.Configuration.GetSection("CalendarAPIConfiguration").Bind(new CalendarAPIConfiguration());
 builder.Configuration.GetSection("TelegramBotConfig").Bind(new TelegramBotConfig());
-builder.Configuration.GetSection("PrayerTimeApiConfig").Bind(new PrayerTimeApiConfig());
+builder.Configuration.GetSection("OneApiServiceConfig").Bind(new OneApiServiceConfig());
 
 var telegramService = builder.Services.BuildServiceProvider().GetRequiredService<ITelegramService>();
 telegramService.Start();

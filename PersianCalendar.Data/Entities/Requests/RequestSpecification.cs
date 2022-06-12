@@ -7,9 +7,8 @@
             Endpoint = endpoint;
             QueryParameters = new Dictionary<string, string>();
         }
-        public string Endpoint { get; set; }
 
-        public string Body { get; set; }
+        public string Endpoint { get; set; }
 
         public Dictionary<string, string> QueryParameters { get; set; }
     }

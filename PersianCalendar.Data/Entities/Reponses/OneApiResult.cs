@@ -1,9 +1,9 @@
 ﻿namespace PersianCalendar.Data.Entities.Reponses
 {
-    public class PrayerTimeResult
+    public class OneApiResult<T>
     {
         public string Status { get; set; }
 
-        public PrayerTime Result { get; set; }
+        public T Result { get; set; }
     }
 }

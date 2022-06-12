@@ -1,6 +1,6 @@
 ﻿namespace PersianCalendar.Data.Entities.Configs
 {
-    public class PrayerTimeApiConfig
+    public class OneApiServiceConfig
     {
         public static string Token { get; set; }
 

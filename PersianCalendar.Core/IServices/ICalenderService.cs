@@ -6,9 +6,7 @@
 
         string GetTime();
 
-        string GetPersianDateTime();
-
-        Task<string> GetPrayerTimeForCityOfIran(string cityName);
+        string GetDateTime();
 
         Task<string> GetOccasionsOfDay();
     }

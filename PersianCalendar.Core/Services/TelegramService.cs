@@ -4,13 +4,15 @@
     {
         private readonly TelegramBotClient botClient;
         private readonly ICalendarService CalendarService;
+        private readonly IOneApiService oneApiService;
         private string LastCommand;
         private long ChatId;
 
-        public TelegramService(ICalendarService CalendarService)
+        public TelegramService(ICalendarService CalendarService, IOneApiService oneApiService)
         {
             botClient = new TelegramBotClient(TelegramBotConfig.Token);
             this.CalendarService = CalendarService;
+            this.oneApiService = oneApiService;
         }
 
         public void Start()
@@ -44,7 +46,7 @@
             }
             if (chatId == ChatId && LastCommand == "/prayertimes")
             {
-                await SendMessage(chatId, await CalendarService.GetPrayerTimeForCityOfIran(command.Replace("/", "")));
+                await SendMessage(chatId, await oneApiService.GetPrayerTimeForCityOfIran(command.Replace("/", "")));
             }
             await ResponseToCommand(chatId, command);
         }
@@ -71,14 +73,17 @@
                 case "/occasions":
                     await SendMessage(chatId, await CalendarService.GetOccasionsOfDay());
                     break;
-                case "/time":
-                    await SendMessage(chatId, CalendarService.GetTime());
+                case "/omen":
+                    await SendMessage(chatId, await oneApiService.GetHafezOmen());
                     break;
                 case "/date":
                     await SendMessage(chatId, CalendarService.GetDate());
                     break;
+                case "/time":
+                    await SendMessage(chatId, CalendarService.GetTime());
+                    break;
                 case "/datetime":
-                    await SendMessage(chatId, CalendarService.GetPersianDateTime());
+                    await SendMessage(chatId, CalendarService.GetDateTime());
                     break;
                 case "/prayertimes":
                     await SendChooseCityMessage(chatId);
@@ -90,6 +95,10 @@
 
         private async Task SendMessage(long chatId, string message)
         {
+            if (message.Length > 4096)
+            {
+                message = "متاسفانه خطایی رخ داده است،لطفا کمی بعد دوباره تلاش کنید";
+            }
             await botClient.SendTextMessageAsync(chatId, message);
         }
 

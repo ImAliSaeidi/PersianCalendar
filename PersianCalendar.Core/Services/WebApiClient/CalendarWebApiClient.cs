@@ -7,15 +7,6 @@
             return await SendRequest<T>(requestSpecification, Method.Get);
         }
 
-        public async Task<RestResponse<T>> Post<T>(RequestSpecification requestSpecification)
-        {
-            return await SendRequest<T>(requestSpecification, Method.Post);
-        }
-
-        public async Task<RestResponse<T>> Delete<T>(RequestSpecification requestSpecification)
-        {
-            return await SendRequest<T>(requestSpecification, Method.Delete);
-        }
         private async Task<RestResponse<T>> SendRequest<T>(RequestSpecification requestSpecification, Method method)
         {
             var client = CreateClient(requestSpecification);
@@ -35,8 +26,5 @@
             request.AddHeader("Content-Type", "application/json");
             return request;
         }
-
-
-
     }
 }

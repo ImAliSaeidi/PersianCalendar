@@ -3,9 +3,9 @@
     public class CalendarService : ICalendarService
     {
         private readonly ICalendarWebApiClient persianCalendarWebApiClient;
-        private IPrayerTimeWebApiClient pryerTimeWebApiClient;
+        private IOneApiWebApiClient pryerTimeWebApiClient;
 
-        public CalendarService(ICalendarWebApiClient persianCalendarWebApiClient, IPrayerTimeWebApiClient pryerTimeWebApiClient)
+        public CalendarService(ICalendarWebApiClient persianCalendarWebApiClient, IOneApiWebApiClient pryerTimeWebApiClient)
         {
             this.persianCalendarWebApiClient = persianCalendarWebApiClient;
             this.pryerTimeWebApiClient = pryerTimeWebApiClient;
@@ -136,31 +136,10 @@
             return DateTime.Now.ToLongTimeString();
         }
 
-        public string GetPersianDateTime()
+        public string GetDateTime()
         {
             return DateTime.Now.ToShamsiDateTime();
         }
 
-        public async Task<string> GetPrayerTimeForCityOfIran(string cityName)
-        {
-            var result = "متاسفانه شهر مورد نظر یافت نشد";
-            var prayerTimeResult = new PrayerTimeResult();
-            var request = new RequestSpecification(string.Empty);
-            request.QueryParameters.Add("token", PrayerTimeApiConfig.Token);
-            request.QueryParameters.Add("city", cityName);
-            request.QueryParameters.Add("en_num", "true");
-
-            var response = await pryerTimeWebApiClient.Get<RestResponse>(request);
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                prayerTimeResult = JsonConvert.DeserializeObject<PrayerTimeResult>(response.Content);
-                if (prayerTimeResult.Result != null)
-                {
-                    result = prayerTimeResult.Result.ToString();
-                }
-            }
-
-            return result;
-        }
     }
 }
