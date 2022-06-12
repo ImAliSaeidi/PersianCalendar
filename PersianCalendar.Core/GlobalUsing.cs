@@ -3,7 +3,6 @@ global using PersianCalendar.Core.Convertors;
 global using PersianCalendar.Core.IServices;
 global using PersianCalendar.Core.IServices.WebApiClient;
 global using PersianCalendar.Data.Entities.Configs;
-global using PersianCalendar.Data.Entities.Enums;
 global using PersianCalendar.Data.Entities.Reponses;
 global using PersianCalendar.Data.Entities.Requests;
 global using RestSharp;

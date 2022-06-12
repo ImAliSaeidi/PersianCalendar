@@ -2,42 +2,74 @@
 {
     public static class DateConvertor
     {
+        private static readonly System.Globalization.PersianCalendar persianCalendar = new System.Globalization.PersianCalendar();
+        private static readonly System.Globalization.GregorianCalendar gregorianCalendar = new System.Globalization.GregorianCalendar();
+        private static readonly System.Globalization.HijriCalendar hijriCalendar = new System.Globalization.HijriCalendar();
+
+        #region Shamsi
         public static string ToShamsiDateOnly(this DateTime value)
         {
-            System.Globalization.PersianCalendar pc = new System.Globalization.PersianCalendar();
-
-            string date = pc.GetYear(value) + "-" + pc.GetMonth(value).ToString("00") + "-" +
-                   pc.GetDayOfMonth(value).ToString("00");
-
-            return date;
+            return
+                $"{persianCalendar.GetYear(value)}/" +
+                $"{persianCalendar.GetMonth(value)}/" +
+                $"{persianCalendar.GetDayOfMonth(value)}";
         }
         public static string ToShamsiDateTime(this DateTime value)
         {
-            System.Globalization.PersianCalendar pc = new System.Globalization.PersianCalendar();
-
-            string date = pc.GetYear(value) + "-" + pc.GetMonth(value).ToString("00") + "-" +
-                   pc.GetDayOfMonth(value).ToString("00") + $" {value.ToString("HH:mm")}";
-
-            return date;
+            return
+                $"{ToShamsiDateOnly(value)}  " +
+                $"{value.ToString("HH:mm:ss")}";
         }
 
-        public static string GetShamsiDay(this DateTime value)
+        public static string GetShamsiDayOfMonth(this DateTime value)
         {
-            System.Globalization.PersianCalendar pc = new System.Globalization.PersianCalendar();
-
-            string day = pc.GetDayOfMonth(value).ToString("00");
-
-            return day;
+            return persianCalendar.GetDayOfMonth(value).ToString("00");
         }
 
         public static string GetShamsiMonth(this DateTime value)
         {
-            System.Globalization.PersianCalendar pc = new System.Globalization.PersianCalendar();
+            return persianCalendar.GetMonth(value).ToString("00");
+        }
+        #endregion
 
-            string day = pc.GetMonth(value).ToString("00");
-
-            return day;
+        #region Gregorian
+        public static string ToGregorianDateOnly(this DateTime value)
+        {
+            return
+               $"{gregorianCalendar.GetYear(value)}/" +
+               $"{gregorianCalendar.GetMonth(value)}/" +
+               $"{gregorianCalendar.GetDayOfMonth(value)}";
         }
 
+        public static string GetGregorianDayOfMonth(this DateTime value)
+        {
+            return gregorianCalendar.GetDayOfMonth(value).ToString("00");
+        }
+
+        public static string GetGregorianMonth(this DateTime value)
+        {
+            return gregorianCalendar.GetMonth(value).ToString("00");
+        }
+        #endregion
+
+        #region Hijri
+        public static string ToHijriDateOnly(this DateTime value)
+        {
+            return
+               $"{hijriCalendar.GetYear(value)}/" +
+               $"{hijriCalendar.GetMonth(value)}/" +
+               $"{hijriCalendar.GetDayOfMonth(value)}";
+        }
+
+        public static string GetHijriDayOfMonth(this DateTime value)
+        {
+            return hijriCalendar.GetDayOfMonth(value).ToString("00");
+        }
+
+        public static string GetHijriMonth(this DateTime value)
+        {
+            return hijriCalendar.GetMonth(value).ToString("00");
+        }
+        #endregion
     }
 }

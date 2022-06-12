@@ -1,38 +1,137 @@
 ﻿namespace PersianCalendar.Core.Services
 {
-    public class PersianCalendarService : IPersianCalendarService
+    public class CalendarService : ICalendarService
     {
-        private readonly IPersianCalendarWebApiClient persianCalendarWebApiClient;
+        private readonly ICalendarWebApiClient persianCalendarWebApiClient;
         private IPrayerTimeWebApiClient pryerTimeWebApiClient;
 
-        public PersianCalendarService(IPersianCalendarWebApiClient persianCalendarWebApiClient, IPrayerTimeWebApiClient pryerTimeWebApiClient)
+        public CalendarService(ICalendarWebApiClient persianCalendarWebApiClient, IPrayerTimeWebApiClient pryerTimeWebApiClient)
         {
             this.persianCalendarWebApiClient = persianCalendarWebApiClient;
             this.pryerTimeWebApiClient = pryerTimeWebApiClient;
         }
 
-        public async Task<OccasionsResult> GetShamsiOccasionsOfDay()
+        private static string FillShamsiOccasionsOfDay(List<DayOccasion> shamsiOccasionsResult)
         {
-            var result = new OccasionsResult();
-            var day = DateTime.Now.GetShamsiDay();
-            var month = DateTime.Now.GetShamsiMonth();
-            var calendarType = CalendarType.Shamsi.GetEnumDescription();
-            var request = new RequestSpecification($"/{calendarType}/{day}/{month}");
+            var result = "";
+
+            if (shamsiOccasionsResult.Count != 0)
+            {
+                result += "تقویم شمسی:\n";
+
+                for (int i = 0; i < shamsiOccasionsResult.Count; i++)
+                {
+                    result += $"{i + 1}){shamsiOccasionsResult[i].ToString()}";
+                }
+
+                result += $"{new string('-', 50)}\n";
+            }
+
+            return result;
+        }
+        private static string FillGregorianOccasionsOfDay(List<DayOccasion> gregorianOccasionsResult)
+        {
+            var result = "";
+
+            if (gregorianOccasionsResult.Count != 0)
+            {
+                result += "تقویم میلادی:\n";
+
+                for (int i = 0; i < gregorianOccasionsResult.Count; i++)
+                {
+                    result += $"{i + 1}){gregorianOccasionsResult[i].ToString()}";
+                }
+
+                result += $"{new string('-', 50)}\n";
+            }
+
+            return result;
+        }
+
+        private static string FillHijriOccasionsOfDay(List<DayOccasion> hijriOccasionsResult)
+        {
+            var result = "";
+
+            if (hijriOccasionsResult.Count != 0)
+            {
+                result += "تقویم قمری:\n";
+
+                for (int i = 0; i < hijriOccasionsResult.Count; i++)
+                {
+                    result += $"{i + 1}){hijriOccasionsResult[i].ToString()}";
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<string> GetOccasionsOfDay()
+        {
+            var result = "";
+
+            var occasionsResult = new OccasionsResult();
+
+            var shamsiDate = DateTime.Now.ToShamsiDateOnly();
+            var gregorianDate = DateTime.Now.ToGregorianDateOnly();
+            var hijriDate = DateTime.Now.ToHijriDateOnly();
+
+            var persianDayofMonth = DateTime.Now.GetShamsiDayOfMonth();
+            var persianMonth = DateTime.Now.GetShamsiMonth();
+
+            var gregorianDayOfMonth = DateTime.Now.GetGregorianDayOfMonth();
+            var gregorianMonth = DateTime.Now.GetGregorianMonth();
+
+            var hijriDayOfMonth = DateTime.Now.GetHijriDayOfMonth();
+            var hijriMonth = DateTime.Now.GetHijriMonth();
+
+            var endpoint = $"/sh,wc,ic/" +
+                $"{persianDayofMonth}," +
+                $"{gregorianDayOfMonth}," +
+                $"{hijriDayOfMonth}/" +
+                $"{persianMonth}," +
+                $"{gregorianMonth}," +
+                $"{hijriMonth}";
+
+            var request = new RequestSpecification(endpoint);
 
             var response = await persianCalendarWebApiClient.Get<RestResponse>(request);
             if (response.Content.Contains("success"))
             {
-                result = JsonConvert.DeserializeObject<OccasionsResult>(response.Content);
+                occasionsResult = JsonConvert.DeserializeObject<OccasionsResult>(response.Content);
+
+                result +=
+                  $"تاریخ شمسی : {shamsiDate}\n" +
+                  $"{new string('-', 50)}\n" +
+                  $"تاریخ میلادی : {gregorianDate}\n" +
+                  $"{new string('-', 50)}\n" +
+                  $"تاریخ قمری : {hijriDate}\n" +
+                  $"{new string('-', 100)}\n" +
+                  $"مناسبت های امروز:\n";
+
+                if (occasionsResult.Values.Count != 0)
+                {
+                    result += FillShamsiOccasionsOfDay(occasionsResult.Values.Where(x => x.Type == "SH").ToList());
+                    result += FillGregorianOccasionsOfDay(occasionsResult.Values.Where(x => x.Type == "WC").ToList());
+                    result += FillHijriOccasionsOfDay(occasionsResult.Values.Where(x => x.Type == "IC").ToList());
+                }
+                else
+                {
+                    result += "مناسبتی وجود ندارد";
+                }
             }
+
             return result;
         }
 
-        public string GetPersianDate()
+        public string GetDate()
         {
-            return DateTime.Now.ToShamsiDateOnly();
+            return
+                $"تاریخ شمسی : {DateTime.Now.ToShamsiDateOnly()}\n" +
+                $"تاریخ میلادی : {DateTime.Now.ToGregorianDateOnly()}\n" +
+                $"تاریخ قمری : {DateTime.Now.ToHijriDateOnly()}";
         }
 
-        public string GetPersianTime()
+        public string GetTime()
         {
             return DateTime.Now.ToLongTimeString();
         }
@@ -42,9 +141,10 @@
             return DateTime.Now.ToShamsiDateTime();
         }
 
-        public async Task<PrayerTimeResult> GetPrayerTimeForCityOfIran(string cityName)
+        public async Task<string> GetPrayerTimeForCityOfIran(string cityName)
         {
-            var result = new PrayerTimeResult();
+            var result = "متاسفانه شهر مورد نظر یافت نشد";
+            var prayerTimeResult = new PrayerTimeResult();
             var request = new RequestSpecification(string.Empty);
             request.QueryParameters.Add("token", PrayerTimeApiConfig.Token);
             request.QueryParameters.Add("city", cityName);
@@ -53,7 +153,11 @@
             var response = await pryerTimeWebApiClient.Get<RestResponse>(request);
             if (response.StatusCode == HttpStatusCode.OK)
             {
-                result = JsonConvert.DeserializeObject<PrayerTimeResult>(response.Content);
+                prayerTimeResult = JsonConvert.DeserializeObject<PrayerTimeResult>(response.Content);
+                if (prayerTimeResult.Result != null)
+                {
+                    result = prayerTimeResult.Result.ToString();
+                }
             }
 
             return result;

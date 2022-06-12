@@ -3,14 +3,14 @@
     public class TelegramService : ITelegramService
     {
         private readonly TelegramBotClient botClient;
-        private readonly IPersianCalendarService persianCalendarService;
+        private readonly ICalendarService CalendarService;
         private string LastCommand;
         private long ChatId;
 
-        public TelegramService(IPersianCalendarService persianCalendarService)
+        public TelegramService(ICalendarService CalendarService)
         {
             botClient = new TelegramBotClient(TelegramBotConfig.Token);
-            this.persianCalendarService = persianCalendarService;
+            this.CalendarService = CalendarService;
         }
 
         public void Start()
@@ -44,7 +44,7 @@
             }
             if (chatId == ChatId && LastCommand == "/prayertimes")
             {
-                await SendPrayerTimeMessage(chatId, command.Replace("/", ""));
+                await SendMessage(chatId, await CalendarService.GetPrayerTimeForCityOfIran(command.Replace("/", "")));
             }
             await ResponseToCommand(chatId, command);
         }
@@ -62,27 +62,6 @@
             return Task.CompletedTask;
         }
 
-        private async Task SendDailyOccasions(long chatId, OccasionsResult occasionsResult)
-        {
-            var occasionsList = occasionsResult.Values.Select(x => x.Occasion).ToList();
-            var occasionsString = "مناسبتی وجود ندارد";
-            if (occasionsList.Count != 0)
-            {
-                occasionsString = "";
-                for (int i = 0; i < occasionsList.Count; i++)
-                {
-                    occasionsString += $"{i + 1}){occasionsList[i]}\n";
-                }
-            }
-
-            var message = $"تاریخ میلادی:\n{DateTime.Now.ToShortDateString()}\n" +
-                $"{new string('-', 15)}\n" +
-                $"تاریخ شمسی:\n{DateTime.Now.ToShamsiDateOnly()}\n" +
-                $"{new string('-', 15)}\n" +
-                $"مناسبت های روز:\n{occasionsString}";
-            await botClient.SendTextMessageAsync(chatId, message);
-        }
-
         private async Task ResponseToCommand(long chatId, string command)
         {
             LastCommand = command;
@@ -90,16 +69,16 @@
             switch (command)
             {
                 case "/occasions":
-                    await SendDailyOccasions(chatId, await persianCalendarService.GetShamsiOccasionsOfDay());
+                    await SendMessage(chatId, await CalendarService.GetOccasionsOfDay());
                     break;
                 case "/time":
-                    await SendMessage(chatId, persianCalendarService.GetPersianTime());
+                    await SendMessage(chatId, CalendarService.GetTime());
                     break;
                 case "/date":
-                    await SendMessage(chatId, persianCalendarService.GetPersianDate());
+                    await SendMessage(chatId, CalendarService.GetDate());
                     break;
                 case "/datetime":
-                    await SendMessage(chatId, persianCalendarService.GetPersianDateTime());
+                    await SendMessage(chatId, CalendarService.GetPersianDateTime());
                     break;
                 case "/prayertimes":
                     await SendChooseCityMessage(chatId);
@@ -112,12 +91,6 @@
         private async Task SendMessage(long chatId, string message)
         {
             await botClient.SendTextMessageAsync(chatId, message);
-        }
-
-        private async Task SendPrayerTimeMessage(long chatId, string cityName)
-        {
-            var prayerTimeResult = await persianCalendarService.GetPrayerTimeForCityOfIran(cityName);
-            await botClient.SendTextMessageAsync(chatId, prayerTimeResult.Result.ToString());
         }
 
         private async Task SendChooseCityMessage(long chatId)

@@ -1,6 +1,6 @@
 ﻿namespace PersianCalendar.Core.Services.WebApiClient
 {
-    public class PersianCalendarWebApiClient : IPersianCalendarWebApiClient
+    public class CalendarWebApiClient : ICalendarWebApiClient
     {
         public async Task<RestResponse<T>> Get<T>(RequestSpecification requestSpecification)
         {
