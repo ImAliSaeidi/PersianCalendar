@@ -1,20 +1,20 @@
-﻿using Telegram.Bot.Types.ReplyMarkups;
-
-namespace PersianCalendar.Core.Services
+﻿namespace PersianCalendar.Core.Services
 {
     public class TelegramService : ITelegramService
     {
         private readonly TelegramBotClient botClient;
-        private readonly ICalendarService CalendarService;
+        private readonly ICalendarService calendarService;
         private readonly IOneApiService oneApiService;
+        private readonly MongoService mongoService;
         private string LastCommand;
         private long ChatId;
 
-        public TelegramService(ICalendarService CalendarService, IOneApiService oneApiService)
+        public TelegramService(ICalendarService calendarService, IOneApiService oneApiService, MongoService mongoService)
         {
             botClient = new TelegramBotClient(TelegramBotConfig.Token);
-            this.CalendarService = CalendarService;
+            this.calendarService = calendarService;
             this.oneApiService = oneApiService;
+            this.mongoService = mongoService;
         }
 
         public void Start()
@@ -43,6 +43,9 @@ namespace PersianCalendar.Core.Services
             var chatId = update.Message.Chat.Id;
             var command = update.Message.Text;
             var messageId = update.Message.MessageId;
+
+            await mongoService.SaveUserData(new UserInfo() { UserId = chatId });
+
             if (command.Contains('@'))
             {
                 command = command.Split('@')[0];
@@ -74,19 +77,19 @@ namespace PersianCalendar.Core.Services
             switch (command)
             {
                 case "/occasions":
-                    await SendMessage(chatId, await CalendarService.GetOccasionsOfDay(), messageId);
+                    await SendMessage(chatId, await calendarService.GetOccasionsOfDay(), messageId);
                     break;
                 case "/omen":
                     await SendMessage(chatId, await oneApiService.GetHafezOmen(), messageId);
                     break;
                 case "/date":
-                    await SendMessage(chatId, CalendarService.GetDate(), messageId);
+                    await SendMessage(chatId, calendarService.GetDate(), messageId);
                     break;
                 case "/time":
-                    await SendMessage(chatId, CalendarService.GetTime(), messageId);
+                    await SendMessage(chatId, calendarService.GetTime(), messageId);
                     break;
                 case "/datetime":
-                    await SendMessage(chatId, CalendarService.GetDateTime(), messageId);
+                    await SendMessage(chatId, calendarService.GetDateTime(), messageId);
                     break;
                 case "/prayertimes":
                     await SendChooseCityMessage(chatId);
@@ -96,7 +99,7 @@ namespace PersianCalendar.Core.Services
             }
         }
 
-        private async Task SendMessage(long chatId, string message, int messageId)
+        private async Task SendMessage(long chatId, string message, int? messageId)
         {
             if (message.Length > 4096)
             {
@@ -114,6 +117,16 @@ namespace PersianCalendar.Core.Services
         public async Task SendStartMessage()
         {
             await botClient.SendTextMessageAsync("395886871", "Start");
+        }
+
+        public async Task SendDailyOccasions()
+        {
+            var message = await calendarService.GetOccasionsOfDay();
+            var users = await mongoService.GetAsync();
+            foreach (var user in users)
+            {
+                await SendMessage(user.UserId, message, null);
+            }
         }
     }
 }

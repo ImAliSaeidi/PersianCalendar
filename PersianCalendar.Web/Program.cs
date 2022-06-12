@@ -17,10 +17,15 @@ builder.Services.AddScoped<ITelegramService, TelegramService>();
 builder.Configuration.GetSection("CalendarAPIConfiguration").Bind(new CalendarAPIConfiguration());
 builder.Configuration.GetSection("TelegramBotConfig").Bind(new TelegramBotConfig());
 builder.Configuration.GetSection("OneApiServiceConfig").Bind(new OneApiServiceConfig());
+builder.Services.Configure<MongoDBConfig>(builder.Configuration.GetSection("MongoDBConfig"));
+builder.Services.AddSingleton<MongoService>();
 
 var telegramService = builder.Services.BuildServiceProvider().GetRequiredService<ITelegramService>();
 telegramService.Start();
 await telegramService.SendStartMessage();
+await telegramService.SendDailyOccasions();
+
+builder.Services.AddHostedService<DailyOccasionsHostedService>();
 
 var app = builder.Build();
 

@@ -2,12 +2,12 @@
 {
     public class CalendarService : ICalendarService
     {
-        private readonly ICalendarWebApiClient persianCalendarWebApiClient;
+        private readonly ICalendarWebApiClient calendarWebApiClient;
         private IOneApiWebApiClient pryerTimeWebApiClient;
 
-        public CalendarService(ICalendarWebApiClient persianCalendarWebApiClient, IOneApiWebApiClient pryerTimeWebApiClient)
+        public CalendarService(ICalendarWebApiClient calendarWebApiClient, IOneApiWebApiClient pryerTimeWebApiClient)
         {
-            this.persianCalendarWebApiClient = persianCalendarWebApiClient;
+            this.calendarWebApiClient = calendarWebApiClient;
             this.pryerTimeWebApiClient = pryerTimeWebApiClient;
         }
 
@@ -94,7 +94,7 @@
 
             var request = new RequestSpecification(endpoint);
 
-            var response = await persianCalendarWebApiClient.Get<RestResponse>(request);
+            var response = await calendarWebApiClient.Get<RestResponse>(request);
             if (response.Content.Contains("success"))
             {
                 occasionsResult = JsonConvert.DeserializeObject<OccasionsResult>(response.Content);

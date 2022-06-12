@@ -5,5 +5,7 @@
         void Start();
 
         Task SendStartMessage();
+
+        Task SendDailyOccasions();
     }
 }
