@@ -14,6 +14,7 @@ Features On The Way:
 <hr/>
 How To Use:
 <ol>
-  <li>Add Your Telegram Bot Token In appsetting.json</li>
-  <li>Add Your MongoDB Config In appsetting.json</li>
+  <li>Add Your Telegram Bot Token In appsettings.json</li>
+  <li>Add Your One Api Token In appsettings.json</li>
+  <li>Add Your MongoDB Config In appsettings.json</li>
 </ol>
