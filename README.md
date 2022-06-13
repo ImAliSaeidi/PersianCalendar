@@ -11,3 +11,9 @@ Features On The Way:
 <ol type="I">
   <li>Translating Text With Google Translate API</li>
 </ol>
+<hr/>
+How To Use:
+<ol>
+  <li>Add Your Telegram Bot Token In appsetting.json</li>
+  <li>Add Your MongoDB Config In appsetting.json</li>
+</ol>
